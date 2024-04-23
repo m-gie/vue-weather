@@ -2,7 +2,9 @@
   <div>
     <Suspense>
       <AsyncCityView />
-      <template #fallback> Loading... </template>
+      <template #fallback>
+        <div class="flex flex-1 items-center justify-center text-white p-4">Loading...</div>
+      </template>
     </Suspense>
   </div>
 </template>
