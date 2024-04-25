@@ -11,10 +11,12 @@
         <i
           class="fa-solid fa-circle-info text-xl hover:text-weather-secondary duration-300 cursor-pointer"
           @click="toggleModal"
-        />
+        ></i>
         <i
           class="fa-solid fa-plus text-xl hover:text-weather-secondary duration-300 cursor-pointer"
-        />
+          @click="addCity"
+          v-show="!isSaved"
+        ></i>
       </div>
       <InfoModal :modalActive="modalActive" @close-modal="toggleModal">
         <div class="text-black">
@@ -48,12 +50,47 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import InfoModal from './InfoModal.vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
+interface CityProps {
+  name: string
+}
+
+const route = useRoute()
+const isSaved = ref(false)
 const modalActive = ref(false)
+
+watch(
+  () => route.query,
+  async (newQuery, oldQuery) => {
+    if (localStorage.getItem('savedCities')) {
+      const savedCities = await JSON.parse(localStorage.getItem('savedCities')!)
+      if (savedCities.some((city: { name: string }) => city.name === route.params.city)) {
+        isSaved.value = true
+      }
+    }
+  }
+)
+
 const toggleModal = () => {
   modalActive.value = !modalActive.value
+}
+
+const savedCities = ref<Array<CityProps>>([])
+
+const addCity = () => {
+  if (localStorage.getItem('savedCities')) {
+    savedCities.value = JSON.parse(localStorage.getItem('savedCities')!)
+  }
+  const locationObject = {
+    name: route.params.city as string
+  }
+  if (!savedCities.value.some((city: { name: string }) => city.name === route.params.city)) {
+    savedCities.value.push(locationObject)
+    localStorage.setItem('savedCities', JSON.stringify(savedCities.value))
+    isSaved.value = true
+  }
 }
 </script>

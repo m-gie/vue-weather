@@ -2,6 +2,7 @@
   <div class="flex flex-col flex-1 items-center">
     <div
       class="text-white p-4 bg-weather-secondary w-full flex flex-wrap justify-center flex-1 items-center"
+      v-if="!isSaved"
     >
       Press the <span class="text-2xl px-2">+</span> button to add the city to your favourites.
     </div>
@@ -229,6 +230,17 @@ const route = useRoute()
 const weatherForecastResults = ref<WeatherForecastProps | null>(null)
 const todayHours = ref<ForecastHourProps[] | null>(null)
 const forecastDayData = ref<ForecastDayProps | null>(null)
+const isSaved = ref(false)
+
+const checkSavedCities = async () => {
+  if (localStorage.getItem('savedCities')) {
+    const savedCities = await JSON.parse(localStorage.getItem('savedCities')!)
+    if (savedCities.some((city: { name: string }) => city.name === route.params.city)) {
+      isSaved.value = true
+    }
+  }
+}
+checkSavedCities()
 
 const setForecastDayData = async (dayData: ForecastDayProps) => {
   forecastDayData.value = dayData

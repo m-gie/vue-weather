@@ -10,7 +10,7 @@
       />
       <ul
         v-if="weatherApiSearchResults.length > 0"
-        class="absolute bg-weather-secondary text-white w-full shadow-md py-2 px-1 top-[66px]"
+        class="absolute bg-weather-secondary text-white w-full shadow-md py-2 px-1 top-[66px] z-10"
       >
         <li
           v-for="searchResult in weatherApiSearchResults"
@@ -22,6 +22,11 @@
         </li>
       </ul>
     </div>
+    <div class="pt-4 mb-8 relative">
+      <Suspense>
+        <SavedCities />
+      </Suspense>
+    </div>
   </main>
 </template>
 
@@ -29,6 +34,7 @@
 import axios from 'axios'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import SavedCities from '@/components/SavedCities.vue'
 
 interface SearchResultProps {
   country: string
@@ -40,9 +46,14 @@ interface SearchResultProps {
   url: string
 }
 
+// interface CityProps {
+//   name: string
+// }
+
 const searchQuery = ref<String>('')
 const queryTimeout = ref<NodeJS.Timeout>()
 const weatherApiSearchResults = ref<SearchResultProps[]>([])
+// const savedCities = ref<CityProps[]>([])
 
 const router = useRouter()
 
@@ -54,6 +65,16 @@ const previewCity = (searchResult: string) => {
   })
 }
 
+// const checkSavedCities = async () => {
+//   if (localStorage.getItem('savedCities')) {
+//     savedCities.value = await JSON.parse(localStorage.getItem('savedCities')!)
+//     // if (savedCities.some((city: { name: string }) => city.name === route.params.city)) {
+//     //   isSaved.value = true
+//     // }
+//   }
+// }
+// checkSavedCities()
+
 const getSearchResults = () => {
   clearTimeout(queryTimeout.value)
   queryTimeout.value = setTimeout(async () => {
@@ -63,7 +84,6 @@ const getSearchResults = () => {
           `http://api.weatherapi.com/v1/search.json?key=${import.meta.env.VITE_WEATHERAPI_KEY}&q=${searchQuery.value}`
         )
         weatherApiSearchResults.value = result.data
-        console.log(weatherApiSearchResults.value)
         return
       }
       weatherApiSearchResults.value = []
